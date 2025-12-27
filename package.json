@@ -1,6 +1,6 @@
 {
   "name": "react-display-value",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "description": "UI helpers for displaying token amounts, USD values, percentages, and formatted numbers in React.",
   "main": "dist/index.cjs.js",
