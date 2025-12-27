@@ -132,7 +132,7 @@ export function PositionRow({
 
 Try the interactive CodeSandbox:
 
-[Open playground →](https://codesandbox.io/p/devbox/react-typescript-tailwind-playground-forked-6fwqc2?file=%2Fsrc%2FApp.tsx%3A45%2C24&workspaceId=ws_H7quvJvec4oBuBRJyarKm5)
+[Open playground →](https://codesandbox.io/p/devbox/react-typescript-tailwind-playground-forked-6fwqc2?workspaceId=ws_H7quvJvec4oBuBRJyarKm5)
 
 ## Examples
 
