@@ -526,6 +526,8 @@ export interface DisplayValueProps extends QueryResponse {
   aboveMax?: boolean
   indicator?: React.ReactNode | string
   prefix?: React.ReactNode | string
+  displayErrorAndValue?: boolean
+  errorPossition?: "before" | "after"
   loaderSkeleton?: boolean
   skeletonWidth?: number | string
   skeletonClassNameWrapper?: string

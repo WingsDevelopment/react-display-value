@@ -40,6 +40,8 @@ export interface DisplayValueProps extends QueryResponse {
   isError?: boolean
   error?: any
   errorMessage?: string
+  displayErrorAndValue?: boolean
+  errorPossition?: "before" | "after"
 
   // empty
   emptyCell?: React.ReactNode
@@ -72,6 +74,8 @@ export interface DisplayValueProps extends QueryResponse {
 
 /**
  * Span-only renderer. Order rules:
+ * - If `isError && !displayErrorAndValue`: render only the error icon.
+ * - If `isError && displayErrorAndValue`: render error icon before prefix or at end via `errorPossition`.
  * - Indicator is always rendered BEFORE Symbol.
  * - If symbolPosition==="before":  Prefix • Indicator • Symbol • Value
  * - If symbolPosition==="after" :  Prefix • Value • Indicator • Symbol
@@ -90,6 +94,8 @@ export const DisplayValue = React.forwardRef<HTMLSpanElement, DisplayValueProps>
       isError,
       error,
       errorMessage = "Could not load this value, try later 😓",
+      displayErrorAndValue = false,
+      errorPossition = "after",
       isLoading,
       isPending,
       loaderSkeleton = true,
@@ -118,30 +124,34 @@ export const DisplayValue = React.forwardRef<HTMLSpanElement, DisplayValueProps>
       LoaderComponent = DefaultLoader,
       ErrorIconComponent = DefaultErrorIcon,
     },
-    ref
+    ref,
   ) => {
     const isSymbolTruncated = symbolMaxChars < (symbol?.length || 0)
+    const resolvedErrorMessage = String(
+      (error && (error.message || error.shortMessage)) || errorMessage || "Unknown error",
+    )
+    const ErrorChunk = isError ? (
+      <TooltipComponent
+        trigger={
+          <span className={cn("inline-flex items-center leading-none")}>
+            <ErrorIconComponent />
+          </span>
+        }
+        message={resolvedErrorMessage}
+      />
+    ) : null
 
     // ERROR
-    if (isError) {
-      const message =
-        (error && (error.message || error.shortMessage)) || errorMessage || "Unknown error"
-
-      const trigger = (
-        <span className={cn("inline-flex items-center leading-none")}>
-          <ErrorIconComponent />
-        </span>
-      )
-
+    if (isError && !displayErrorAndValue) {
       return (
         <span ref={ref} className={cn("inline-flex items-center align-middle", containerClassName)}>
-          <TooltipComponent trigger={trigger} message={message} />
+          {ErrorChunk}
         </span>
       )
     }
 
     // LOADING / PENDING
-    if ((isLoading && isLoading != null) || (isPending && isPending != null)) {
+    if (!isError && ((isLoading && isLoading != null) || (isPending && isPending != null))) {
       if (loaderSkeleton) {
         return (
           <span ref={ref} className={cn("inline-flex items-center", containerClassName)}>
@@ -166,6 +176,15 @@ export const DisplayValue = React.forwardRef<HTMLSpanElement, DisplayValueProps>
 
     // EMPTY
     if (viewValue == null && fallbackViewValue == null) {
+      if (isError && displayErrorAndValue) {
+        return (
+          <span ref={ref} className={cn("inline-flex items-center", containerClassName)}>
+            {errorPossition === "before" && ErrorChunk}
+            {emptyCell}
+            {errorPossition === "after" && ErrorChunk}
+          </span>
+        )
+      }
       return <>{emptyCell}</>
     }
 
@@ -203,6 +222,7 @@ export const DisplayValue = React.forwardRef<HTMLSpanElement, DisplayValueProps>
 
     return (
       <span ref={ref} className={cn("inline-flex items-center", containerClassName)}>
+        {errorPossition === "before" && ErrorChunk}
         {PrefixChunk}
         {SignChunk}
 
@@ -218,8 +238,9 @@ export const DisplayValue = React.forwardRef<HTMLSpanElement, DisplayValueProps>
         <span className={cn("inline", valueClassName)}>{viewValue ?? fallbackViewValue}</span>
 
         {symbolPosition === "after" && SymbolChunk}
+        {errorPossition === "after" && ErrorChunk}
       </span>
     )
-  }
+  },
 )
 DisplayValue.displayName = "DisplayValue"
